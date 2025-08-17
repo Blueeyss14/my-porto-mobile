@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_portfolio/src/core/dependecies_binding.dart';
 import 'package:my_portfolio/src/routes/routes_name.dart';
 import 'package:my_portfolio/src/routes/routes_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  initDependencies();
   runApp(const MyApp());
 }
 
