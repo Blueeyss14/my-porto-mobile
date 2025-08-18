@@ -69,10 +69,7 @@ class BackgroundPage extends StatelessWidget {
         title: const Text('Add Background'),
         content: const Text('Select image or video file'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -80,7 +77,7 @@ class BackgroundPage extends StatelessWidget {
               );
               if (result != null && result.files.single.path != null) {
                 controller.createBackground(result.files.single.path!);
-                Navigator.pop(context);
+                Get.back();
               }
             },
             child: const Text('Pick File'),
@@ -101,10 +98,7 @@ class BackgroundPage extends StatelessWidget {
         title: const Text('Edit Background'),
         content: Text('Replace: ${background.filename}'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -115,7 +109,7 @@ class BackgroundPage extends StatelessWidget {
                   background.id,
                   result.files.single.path!,
                 );
-                Navigator.pop(context);
+                Get.back();
               }
             },
             child: const Text('Pick New File'),
@@ -136,14 +130,11 @@ class BackgroundPage extends StatelessWidget {
         title: const Text('Delete Background'),
         content: const Text('Are you sure you want to delete this background?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               controller.deleteBackground(id);
-              Navigator.pop(context);
+              Get.back();
             },
             child: const Text('Delete'),
           ),
