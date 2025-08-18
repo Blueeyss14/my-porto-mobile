@@ -16,6 +16,7 @@ class HomeViewmodel extends GetxController {
       {"page": "Background Page", "route": RoutesName.backgroundPage},
       {"page": "Message Page", "route": RoutesName.messagePage},
       {"page": "Song Page", "route": RoutesName.songPage},
+      {"page": "Category Page", "route": RoutesName.categoryPage},
       {"page": "Project Page", "route": RoutesName.projectPage},
     ];
     home.value = pages

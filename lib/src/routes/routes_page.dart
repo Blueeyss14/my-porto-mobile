@@ -1,5 +1,6 @@
 import 'package:get/route_manager.dart';
 import 'package:my_portfolio/src/features/background/views/background_page.dart';
+import 'package:my_portfolio/src/features/category/views/category_page.dart';
 import 'package:my_portfolio/src/features/common/views/home_page.dart';
 import 'package:my_portfolio/src/features/message/views/message_page.dart';
 import 'package:my_portfolio/src/features/project/views/project_page.dart';
@@ -29,6 +30,12 @@ class RoutesPage {
     GetPage(
       name: RoutesName.songPage,
       page: () => const SongPage(),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 200),
+    ),
+    GetPage(
+      name: RoutesName.categoryPage,
+      page: () => const CategoryPage(),
       transition: Transition.fade,
       transitionDuration: const Duration(milliseconds: 200),
     ),
