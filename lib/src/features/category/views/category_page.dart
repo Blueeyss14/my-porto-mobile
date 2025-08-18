@@ -34,7 +34,7 @@ class CategoryPage extends StatelessWidget {
                 final name = nameController.text.trim();
                 if (name.isNotEmpty) {
                   await categoryC.createCategory(name);
-                  Navigator.pop(context);
+                  Get.back();
                 } else {
                   Get.snackbar(
                     'Error',
@@ -54,8 +54,8 @@ class CategoryPage extends StatelessWidget {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Delete Message'),
-          content: const Text('Are you sure you want to delete this message?'),
+          title: const Text('Delete Category'),
+          content: const Text('Are you sure you want to delete this Category?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -91,7 +91,7 @@ class CategoryPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '${categoryC.categoryData[index].id} ${categoryC.categoryData[index].name}',
+                        categoryC.categoryData[index].name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
