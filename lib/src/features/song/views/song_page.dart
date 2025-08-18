@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:my_portfolio/src/core/refresh_data.dart';
 import 'package:my_portfolio/src/features/song/viewmodels/song_viewmodel.dart';
 import 'package:my_portfolio/src/features/song/models/song_model.dart';
 import 'package:my_portfolio/src/shared/components/appbar_custom.dart';
@@ -15,44 +16,47 @@ class SongPage extends StatelessWidget {
 
     return Scaffold(
       appBar: const AppbarCustom(title: 'Song Page'),
-      body: Obx(() {
-        return ListView.builder(
-          itemCount: songC.songData.length,
-          itemBuilder: (context, index) {
-            final song = songC.songData[index];
-            return Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [Text(song.songFile), Text(song.songName)],
+      body: RefreshIndicator(
+        onRefresh: refreshData,
+        child: Obx(() {
+          return ListView.builder(
+            itemCount: songC.songData.length,
+            itemBuilder: (context, index) {
+              final song = songC.songData[index];
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [Text(song.songFile), Text(song.songName)],
+                        ),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () =>
-                              _showEditDialog(context, song, songC),
-                          icon: const Icon(Icons.edit),
-                        ),
-                        IconButton(
-                          onPressed: () =>
-                              _showDeleteDialog(context, song.id, songC),
-                          icon: const Icon(Icons.delete),
-                        ),
-                      ],
-                    ),
-                  ],
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () =>
+                                _showEditDialog(context, song, songC),
+                            icon: const Icon(Icons.edit),
+                          ),
+                          IconButton(
+                            onPressed: () =>
+                                _showDeleteDialog(context, song.id, songC),
+                            icon: const Icon(Icons.delete),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        );
-      }),
+              );
+            },
+          );
+        }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddDialog(context, songC),
         child: const Icon(Icons.add),
