@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:my_portfolio/src/features/project/models/project_model.dart';
@@ -7,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 class ProjectViewmodel extends GetxController {
   var projectData = <ProjectModel>[].obs;
+  var isLoading = false.obs;
 
   @override
   void onInit() {
@@ -17,6 +19,9 @@ class ProjectViewmodel extends GetxController {
   Map<String, String> headers = {
     'Authorization': dotenv.env['API_KEY'] ?? '',
     'Content-Type': 'application/json',
+  };
+  Map<String, String> multipartHeaders = {
+    'Authorization': dotenv.env['API_KEY'] ?? '',
   };
 
   Future<void> fetchProjects() async {
@@ -29,7 +34,10 @@ class ProjectViewmodel extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final result = jsonDecode(response.body)['data'];
         projectData.value = result
-            .map<ProjectModel>((project) => ProjectModel.fromJson(project))
+            .map<ProjectModel>(
+              (project) =>
+                  ProjectModel.fromJson(project as Map<String, dynamic>),
+            )
             .toList();
         projectData.sort((a, b) => a.id.compareTo(b.id));
         Get.snackbar(
@@ -53,56 +61,139 @@ class ProjectViewmodel extends GetxController {
     }
   }
 
-  Future<void> updateData(
-    int id,
-    String newTitle,
-    String newDescription,
-  ) async {
+  Future<void> addProject({
+    required String title,
+    required String subtitle,
+    required String description,
+    required String category,
+    required bool isPinned,
+    PlatformFile? thumbnail,
+    List<PlatformFile>? imageFiles,
+    List<String>? tags,
+    List<Map<String, String>>? contributing,
+    List<Map<String, String>>? resources,
+  }) async {
     try {
-      final index = projectData.indexWhere((p) => p.id == id);
-      if (index == -1) return;
+      isLoading.value = true;
 
-      final updatedProject = ProjectModel(
-        id: projectData[index].id,
-        title: newTitle,
-        subtitle: projectData[index].subtitle,
-        description: newDescription,
-        category: projectData[index].category,
-        isPinned: projectData[index].isPinned,
-        imageUrl: projectData[index].imageUrl,
-        tags: projectData[index].tags,
-        thumbnail: projectData[index].thumbnail,
-        contributing: projectData[index].contributing,
-        resources: projectData[index].resources,
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${dotenv.env['BASE_URL']}/projects'),
       );
 
-      projectData[index] = updatedProject;
+      request.headers.addAll(multipartHeaders);
 
-      final response = await http.patch(
-        Uri.parse('${dotenv.env['BASE_URL']}/projects/$id/'),
-        headers: headers,
-        body: jsonEncode({'title': newTitle, 'description': newDescription}),
-      );
+      request.fields['title'] = title;
+      request.fields['subtitle'] = subtitle;
+      request.fields['description'] = description;
+      request.fields['category'] = category;
+      request.fields['is_pinned'] = isPinned.toString();
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if (thumbnail != null && thumbnail.bytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'thumbnail',
+            thumbnail.bytes!,
+            filename: thumbnail.name,
+          ),
+        );
+      }
+
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (int i = 0; i < imageFiles.length; i++) {
+          final file = imageFiles[i];
+          if (file.bytes != null) {
+            request.files.add(
+              http.MultipartFile.fromBytes(
+                'image_url',
+                file.bytes!,
+                filename: file.name,
+              ),
+            );
+          }
+        }
+      }
+
+      if (tags != null && tags.isNotEmpty) {
+        request.fields['tags'] = jsonEncode(tags);
+      }
+
+      if (contributing != null && contributing.isNotEmpty) {
+        request.fields['contributing'] = jsonEncode(contributing);
+      }
+
+      if (resources != null && resources.isNotEmpty) {
+        request.fields['resources'] = jsonEncode(resources);
+      }
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar(
           'Success',
-          'Project updated successfully',
+          'Project added successfully',
           snackPosition: SnackPosition.BOTTOM,
         );
+
+        await fetchProjects();
       } else {
+        final errorData = jsonDecode(responseBody);
         Get.snackbar(
           'Error',
-          'Failed to update: ${response.statusCode}',
+          'Failed to add project: ${errorData['message'] ?? response.statusCode}',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Update exception: $e',
+        'Add project exception: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<PlatformFile?> pickSingleImage() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        return result.files.first;
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error picking image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
+    }
+  }
+
+  Future<List<PlatformFile>?> pickMultipleImages() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        return result.files;
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error picking images: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
     }
   }
 

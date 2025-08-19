@@ -12,7 +12,8 @@ class ProjectDetail extends StatelessWidget {
     final projectC = Get.find<ProjectViewmodel>();
     return Scaffold(
       appBar: AppBar(title: Text(project.title)),
-      body: Obx(() => Column(children: [Text('')])),
+      // body: Obx(() => Column(children: [Text()])),
+      body: Column(children: [Text(project.title)]),
     );
   }
 }
