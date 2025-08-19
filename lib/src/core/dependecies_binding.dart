@@ -3,6 +3,7 @@ import 'package:my_portfolio/src/features/background/viewmodels/background_viewm
 import 'package:my_portfolio/src/features/category/viewmodels/category_viewmodel.dart';
 import 'package:my_portfolio/src/features/common/viewmodels/home_viewmodel.dart';
 import 'package:my_portfolio/src/features/message/viewmodels/message_viemodel.dart';
+import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.dart';
 import 'package:my_portfolio/src/features/song/viewmodels/song_viewmodel.dart';
 
 void initDependencies() {
@@ -11,4 +12,5 @@ void initDependencies() {
   Get.put(MessageViemodel());
   Get.put(SongViewmodel());
   Get.put(CategoryViewmodel());
+  Get.put(ProjectViewmodel());
 }

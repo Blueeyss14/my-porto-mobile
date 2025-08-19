@@ -5,4 +5,5 @@ abstract class RoutesName {
   static const songPage = '/song';
   static const categoryPage = '/category';
   static const projectPage = '/project';
+  static const projectDetail = '/project-detail';
 }
