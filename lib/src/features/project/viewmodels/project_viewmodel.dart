@@ -40,24 +40,15 @@ class ProjectViewmodel extends GetxController {
             )
             .toList();
         projectData.sort((a, b) => a.id.compareTo(b.id));
-        Get.snackbar(
-          'Success',
-          'Category loaded successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar('Success', 'Category loaded successfully');
       } else {
         Get.snackbar(
           'Error',
           'Failed to fetch messages: ${response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Fetch exception: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Fetch exception: $e');
     }
   }
 
@@ -76,7 +67,7 @@ class ProjectViewmodel extends GetxController {
     try {
       isLoading.value = true;
 
-      var request = http.MultipartRequest(
+      final request = http.MultipartRequest(
         'POST',
         Uri.parse('${dotenv.env['BASE_URL']}/projects'),
       );
@@ -89,20 +80,39 @@ class ProjectViewmodel extends GetxController {
       request.fields['category'] = category;
       request.fields['is_pinned'] = isPinned.toString();
 
-      if (thumbnail != null && thumbnail.bytes != null) {
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            'thumbnail',
-            thumbnail.bytes!,
-            filename: thumbnail.name,
-          ),
-        );
+      ///THUMBNAIL
+      if (thumbnail != null) {
+        if ((thumbnail.path ?? '').isNotEmpty) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'thumbnail',
+              thumbnail.path!,
+              filename: thumbnail.name,
+            ),
+          );
+        } else if (thumbnail.bytes != null) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'thumbnail',
+              thumbnail.bytes!,
+              filename: thumbnail.name,
+            ),
+          );
+        }
       }
 
+      ///image_url
       if (imageFiles != null && imageFiles.isNotEmpty) {
-        for (int i = 0; i < imageFiles.length; i++) {
-          final file = imageFiles[i];
-          if (file.bytes != null) {
+        for (final file in imageFiles) {
+          if ((file.path ?? '').isNotEmpty) {
+            request.files.add(
+              await http.MultipartFile.fromPath(
+                'image_url',
+                file.path!,
+                filename: file.name,
+              ),
+            );
+          } else if (file.bytes != null) {
             request.files.add(
               http.MultipartFile.fromBytes(
                 'image_url',
@@ -117,14 +127,13 @@ class ProjectViewmodel extends GetxController {
       if (tags != null && tags.isNotEmpty) {
         request.fields['tags'] = jsonEncode(tags);
       }
-
       if (contributing != null && contributing.isNotEmpty) {
         request.fields['contributing'] = jsonEncode(contributing);
       }
-
       if (resources != null && resources.isNotEmpty) {
         request.fields['resources'] = jsonEncode(resources);
       }
+
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
@@ -134,22 +143,22 @@ class ProjectViewmodel extends GetxController {
           'Project added successfully',
           snackPosition: SnackPosition.BOTTOM,
         );
-
         await fetchProjects();
       } else {
-        final errorData = jsonDecode(responseBody);
+        final errorData = () {
+          try {
+            return jsonDecode(responseBody);
+          } catch (_) {
+            return {'message': responseBody};
+          }
+        }();
         Get.snackbar(
           'Error',
           'Failed to add project: ${errorData['message'] ?? response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Add project exception: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Add project exception: $e');
     } finally {
       isLoading.value = false;
     }
@@ -167,11 +176,7 @@ class ProjectViewmodel extends GetxController {
       }
       return null;
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error picking image: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Error picking image: $e');
       return null;
     }
   }
@@ -188,11 +193,7 @@ class ProjectViewmodel extends GetxController {
       }
       return null;
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error picking images: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Error picking images: $e');
       return null;
     }
   }
@@ -206,24 +207,12 @@ class ProjectViewmodel extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         projectData.removeWhere((item) => item.id == id);
-        Get.snackbar(
-          'Success',
-          'Message deleted successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar('Success', 'Message deleted successfully');
       } else {
-        Get.snackbar(
-          'Error',
-          'Failed to delete: ${response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar('Error', 'Failed to delete: ${response.statusCode}');
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Delete exception: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Delete exception: $e');
     }
   }
 }

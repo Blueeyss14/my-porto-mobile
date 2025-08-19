@@ -32,18 +32,24 @@ class ProjectModel {
       subtitle: json['subtitle'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? '',
-      isPinned: json['is_pinned'] ?? '',
-      imageUrl: (json['image_url'] as List<dynamic>)
-          .map((e) => ImageItem.fromJson(e))
-          .toList(),
-      tags: List<String>.from(json['tags']),
-      thumbnail: json['thumbnail'],
-      contributing: (json['contributing'] as List<dynamic>)
-          .map((e) => Contributor.fromJson(e))
-          .toList(),
-      resources: (json['resources'] as List<dynamic>)
-          .map((e) => Resource.fromJson(e))
-          .toList(),
+      isPinned: json['is_pinned'] ?? false,
+      imageUrl:
+          (json['image_url'] as List<dynamic>?)
+              ?.map((e) => ImageItem.fromJson(e))
+              .toList() ??
+          [],
+      tags: List<String>.from(json['tags'] ?? []),
+      thumbnail: json['thumbnail'] ?? '',
+      contributing:
+          (json['contributing'] as List<dynamic>?)
+              ?.map((e) => Contributor.fromJson(e))
+              .toList() ??
+          [],
+      resources:
+          (json['resources'] as List<dynamic>?)
+              ?.map((e) => Resource.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
