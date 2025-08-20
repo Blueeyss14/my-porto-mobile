@@ -12,6 +12,11 @@ class TagsWidget extends StatelessWidget {
     final projectC = Get.find<ProjectViewmodel>();
 
     void showEditTagsDialog(int tagIndex) {
+      ///pake dart aseli (work)
+      // final currentProject = projectC.projectData.firstWhere(
+      //   (p) => p.id == project.id,
+      // );
+
       final currentProject = projectC.projectData.firstWhereOrNull(
         (p) => p.id == project.id,
       );
