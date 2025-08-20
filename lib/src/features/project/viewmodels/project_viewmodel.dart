@@ -164,6 +164,125 @@ class ProjectViewmodel extends GetxController {
     }
   }
 
+  Future<void> patchProject({
+    required int id,
+    String? title,
+    String? subtitle,
+    String? description,
+    String? category,
+    bool? isPinned,
+    PlatformFile? thumbnail, // kirim untuk ganti thumbnail
+    List<PlatformFile>? imageFiles, // kirim untuk ganti semua image_url
+    List<String>? tags, // kirim [] untuk clear
+    List<Map<String, String>>? contributing, // kirim [] untuk clear
+    List<Map<String, String>>? resources, // kirim [] untuk clear
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final request = http.MultipartRequest(
+        'PATCH',
+        Uri.parse('${dotenv.env['BASE_URL']}/projects/$id'),
+      );
+
+      request.headers.addAll(multipartHeaders);
+
+      // Only send fields that are provided (partial update)
+      if (title != null) request.fields['title'] = title;
+      if (subtitle != null) request.fields['subtitle'] = subtitle;
+      if (description != null) request.fields['description'] = description;
+      if (category != null) request.fields['category'] = category;
+      if (isPinned != null) request.fields['is_pinned'] = isPinned.toString();
+
+      // Thumbnail: only replaces if you send a new file
+      if (thumbnail != null) {
+        if ((thumbnail.path ?? '').isNotEmpty) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'thumbnail',
+              thumbnail.path!,
+              filename: thumbnail.name,
+            ),
+          );
+        } else if (thumbnail.bytes != null) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'thumbnail',
+              thumbnail.bytes!,
+              filename: thumbnail.name,
+            ),
+          );
+        }
+      }
+
+      // Images: backend akan REPLACE semua images jika field ini DIKIRIM
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (final file in imageFiles) {
+          if ((file.path ?? '').isNotEmpty) {
+            request.files.add(
+              await http.MultipartFile.fromPath(
+                'image_url',
+                file.path!,
+                filename: file.name,
+              ),
+            );
+          } else if (file.bytes != null) {
+            request.files.add(
+              http.MultipartFile.fromBytes(
+                'image_url',
+                file.bytes!,
+                filename: file.name,
+              ),
+            );
+          }
+        }
+      }
+
+      if (tags != null) {
+        request.fields['tags'] = jsonEncode(tags);
+      }
+      if (contributing != null) {
+        request.fields['contributing'] = jsonEncode(contributing);
+      }
+      if (resources != null) {
+        request.fields['resources'] = jsonEncode(resources);
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        Get.snackbar(
+          'Success',
+          'Project updated successfully',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        await fetchProjects();
+      } else {
+        final errorData = () {
+          try {
+            return jsonDecode(responseBody);
+          } catch (_) {
+            return {'message': responseBody};
+          }
+        }();
+        Get.snackbar(
+          'Error',
+          'Failed to update project: ${errorData['error'] ?? errorData['message'] ?? response.statusCode}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Update project exception: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<PlatformFile?> pickSingleImage() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
