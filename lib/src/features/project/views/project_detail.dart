@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_portfolio/src/features/project/models/project_model.dart';
 import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.dart';
+import 'package:my_portfolio/src/features/project/views/widgets/images_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/tags_widget.dart';
 
 class ProjectDetail extends StatelessWidget {
@@ -44,6 +45,7 @@ class ProjectDetail extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               const TagsWidget(),
+              const ImagesWidget(),
               Text('Images:', style: Theme.of(context).textTheme.titleLarge),
               if (currentProject.imageUrl.isEmpty)
                 const Text("No Image")

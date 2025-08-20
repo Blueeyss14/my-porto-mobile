@@ -171,11 +171,11 @@ class ProjectViewmodel extends GetxController {
     String? description,
     String? category,
     bool? isPinned,
-    PlatformFile? thumbnail, // kirim untuk ganti thumbnail
-    List<PlatformFile>? imageFiles, // kirim untuk ganti semua image_url
-    List<String>? tags, // kirim [] untuk clear
-    List<Map<String, String>>? contributing, // kirim [] untuk clear
-    List<Map<String, String>>? resources, // kirim [] untuk clear
+    PlatformFile? thumbnail,
+    List<PlatformFile>? imageFiles,
+    List<String>? tags,
+    List<Map<String, String>>? contributing,
+    List<Map<String, String>>? resources,
   }) async {
     try {
       isLoading.value = true;
@@ -187,14 +187,12 @@ class ProjectViewmodel extends GetxController {
 
       request.headers.addAll(multipartHeaders);
 
-      // Only send fields that are provided (partial update)
       if (title != null) request.fields['title'] = title;
       if (subtitle != null) request.fields['subtitle'] = subtitle;
       if (description != null) request.fields['description'] = description;
       if (category != null) request.fields['category'] = category;
       if (isPinned != null) request.fields['is_pinned'] = isPinned.toString();
 
-      // Thumbnail: only replaces if you send a new file
       if (thumbnail != null) {
         if ((thumbnail.path ?? '').isNotEmpty) {
           request.files.add(
@@ -215,7 +213,6 @@ class ProjectViewmodel extends GetxController {
         }
       }
 
-      // Images: backend akan REPLACE semua images jika field ini DIKIRIM
       if (imageFiles != null && imageFiles.isNotEmpty) {
         for (final file in imageFiles) {
           if ((file.path ?? '').isNotEmpty) {

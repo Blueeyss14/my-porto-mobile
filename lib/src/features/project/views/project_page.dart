@@ -249,7 +249,7 @@ class ProjectPage extends StatelessWidget {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 15),
 
                     // Resources Section
@@ -319,7 +319,7 @@ class ProjectPage extends StatelessWidget {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
