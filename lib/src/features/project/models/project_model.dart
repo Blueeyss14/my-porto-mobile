@@ -50,15 +50,15 @@ class ProjectModel {
   }
 }
 
-class ImageItem {
-  final String url;
+// class ImageItem {
+//   final String url;
 
-  ImageItem({required this.url});
+//   ImageItem({required this.url});
 
-  factory ImageItem.fromJson(Map<String, dynamic> json) {
-    return ImageItem(url: json['url']);
-  }
-}
+//   factory ImageItem.fromJson(Map<String, dynamic> json) {
+//     return ImageItem(url: json['url']);
+//   }
+// }
 
 class Contributor {
   final String name;
