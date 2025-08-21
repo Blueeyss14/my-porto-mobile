@@ -4,6 +4,7 @@ import 'package:my_portfolio/src/features/project/models/project_model.dart';
 import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/contributing_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/images_widget.dart';
+import 'package:my_portfolio/src/features/project/views/widgets/resources_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/tags_widget.dart';
 
 class ProjectDetail extends StatelessWidget {
@@ -48,39 +49,7 @@ class ProjectDetail extends StatelessWidget {
               const TagsWidget(),
               const ImagesWidget(),
               const ContributingWidget(),
-              Text('Images:', style: Theme.of(context).textTheme.titleLarge),
-              if (currentProject.imageUrl.isEmpty)
-                const Text("No Image")
-              else
-                ...List.generate(
-                  currentProject.imageUrl.length,
-                  (index) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              currentProject.imageUrl[index],
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.edit),
-                            tooltip: 'Edit Tag',
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            tooltip: 'Delete Tag',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              const ResourcesWidget(),
             ],
           ),
         );
