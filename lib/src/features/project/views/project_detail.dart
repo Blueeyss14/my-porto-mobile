@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:my_portfolio/src/features/project/models/project_model.dart';
 import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/contributing_widget.dart';
+import 'package:my_portfolio/src/features/project/views/widgets/description_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/images_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/resources_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/tags_widget.dart';
@@ -41,12 +42,8 @@ class ProjectDetail extends StatelessWidget {
                 currentProject.subtitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 16),
-              Text(
-                currentProject.description,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
+
+              const DescriptionWidget(),
               const ThumbnailWidget(),
               const TagsWidget(),
               const ImagesWidget(),
