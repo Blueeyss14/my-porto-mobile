@@ -8,6 +8,7 @@ import 'package:my_portfolio/src/features/project/views/widgets/images_widget.da
 import 'package:my_portfolio/src/features/project/views/widgets/resources_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/tags_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/thumbnail_widget.dart';
+import 'package:my_portfolio/src/features/project/views/widgets/title_widget.dart';
 
 class ProjectDetail extends StatelessWidget {
   const ProjectDetail({super.key});
@@ -33,16 +34,12 @@ class ProjectDetail extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                currentProject.title,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
               const SizedBox(height: 8),
               Text(
                 currentProject.subtitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-
+              const TitleWidget(),
               const DescriptionWidget(),
               const ThumbnailWidget(),
               const TagsWidget(),

@@ -1,195 +1,134 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:my_portfolio/src/features/project/models/project_model.dart';
-// import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:my_portfolio/src/features/project/models/project_model.dart';
+import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.dart';
 
-// class TitleWidget extends StatelessWidget {
-//   const TitleWidget({super.key});
+class TitleWidget extends StatelessWidget {
+  const TitleWidget({super.key});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final ProjectModel project = Get.arguments;
-//     final projectC = Get.find<ProjectViewmodel>();
+  @override
+  Widget build(BuildContext context) {
+    final ProjectModel project = Get.arguments;
+    final projectC = Get.find<ProjectViewmodel>();
 
-//     void showEditTitleDialog() {
-//       ///pake dart aseli (work)
-//       // final currentProject = projectC.projectData.firstWhere(
-//       //   (p) => p.id == project.id,
-//       // );
+    void showEditTitleDialog() {
+      final currentProject = projectC.projectData.firstWhereOrNull(
+        (p) => p.id == project.id,
+      );
+      if (currentProject == null) return;
 
-//       // final currentProject = projectC.projectData.firstWhereOrNull(
-//       //   (p) => p.id == project.id,
-//       // );
-//       // if (currentProject == null) return;
+      final titleController = TextEditingController(text: currentProject.title);
 
-//       final titleController = TextEditingController(text: project.title);
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Edit Title'),
+          content: TextField(
+            maxLines: null,
+            controller: titleController,
+            decoration: const InputDecoration(labelText: 'Title'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await projectC.patchProject(
+                  id: project.id,
+                  title: titleController.text,
+                );
+                if (!context.mounted) return;
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      );
+    }
 
-//       showDialog(
-//         context: context,
-//         builder: (_) => AlertDialog(
-//           title: const Text('Edit Tag'),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               TextField(
-//                 controller: titleController,
-//                 decoration: const InputDecoration(labelText: 'Tag Name'),
-//               ),
-//             ],
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: const Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () async {
-//                 String updateTitle = project.title;
-//                 updateTitle = titleController.text.trim();
+    void showDeleteTitleDialog() {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Delete Title'),
+          content: const Text('Are you sure you want to delete this title?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final currentProject = projectC.projectData.firstWhereOrNull(
+                  (p) => p.id == project.id,
+                );
+                if (currentProject == null) return;
 
-//                 await projectC.patchProject(id: project.id, title: updateTitle);
-//                 if (!context.mounted) return;
-//                 Navigator.pop(context);
-//               },
-//               child: const Text('Save'),
-//             ),
-//           ],
-//         ),
-//       );
-//     }
+                await projectC.patchProject(id: project.id, title: '');
 
-//     void showAddTagDialog() {
-//       final tagController = TextEditingController();
+                if (!context.mounted) return;
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+    }
 
-//       showDialog(
-//         context: context,
-//         builder: (_) => AlertDialog(
-//           title: const Text('Add New Tag'),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               TextField(
-//                 controller: tagController,
-//                 decoration: const InputDecoration(labelText: 'Tag Name'),
-//               ),
-//             ],
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: const Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () async {
-//                 if (tagController.text.trim().isNotEmpty) {
-//                   final currentProject = projectC.projectData.firstWhereOrNull(
-//                     (p) => p.id == project.id,
-//                   );
-//                   if (currentProject == null) return;
+    return Obx(() {
+      final currentProject = projectC.projectData.firstWhereOrNull(
+        (p) => p.id == project.id,
+      );
+      if (currentProject == null) {
+        return const Center(child: Text('Project not found'));
+      }
 
-//                   List<String> updatedTags = List<String>.from(
-//                     currentProject.tags,
-//                   );
-//                   updatedTags.add(tagController.text.trim());
-
-//                   await projectC.patchProject(
-//                     id: project.id,
-//                     tags: updatedTags,
-//                   );
-//                 }
-
-//                 Get.back();
-//               },
-
-//               child: const Text('Add'),
-//             ),
-//           ],
-//         ),
-//       );
-//     }
-
-//     void showDeleteTagDialog(int tagIndex) {
-//       showDialog(
-//         context: context,
-//         builder: (_) => AlertDialog(
-//           title: const Text('Delete Tag'),
-//           content: Text(
-//             'Are you sure you want to delete "${project.tags[tagIndex]}"?',
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context),
-//               child: const Text('Cancel'),
-//             ),
-//             ElevatedButton(
-//               onPressed: () async {
-//                 List<String> updatedTags = List<String>.from(project.tags);
-//                 updatedTags.removeAt(tagIndex);
-
-//                 await projectC.patchProject(id: project.id, tags: updatedTags);
-
-//                 Get.back();
-//               },
-//               child: const Text('Delete'),
-//             ),
-//           ],
-//         ),
-//       );
-//     }
-
-//     return Obx(() {
-//       // final currentProject = projectC.projectData.firstWhereOrNull(
-//       //   (p) => p.id == project.id,
-//       // );
-//       if (project == null) {
-//         return const Center(child: Text('Project not found'));
-//       }
-
-//       return Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               Text('Tags:', style: Theme.of(context).textTheme.titleLarge),
-//               IconButton(
-//                 onPressed: () => showAddTagDialog(),
-//                 icon: const Icon(Icons.add),
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 8),
-//           if (project.title.isEmpty)
-//             const Text('No tags available')
-//           else
-//             Card(
-//               margin: const EdgeInsets.only(bottom: 8),
-//               child: Padding(
-//                 padding: const EdgeInsets.all(12),
-//                 child: Row(
-//                   children: [
-//                     Expanded(
-//                       child: Text(
-//                         project.title,
-//                         style: Theme.of(context).textTheme.bodyLarge,
-//                       ),
-//                     ),
-//                     IconButton(
-//                       onPressed: () => showEditTitleDialog(),
-//                       icon: const Icon(Icons.edit),
-//                       tooltip: 'Edit Tag',
-//                     ),
-//                     IconButton(
-//                       onPressed: () => {},
-//                       icon: const Icon(Icons.delete),
-//                       tooltip: 'Delete Tag',
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//         ],
-//       );
-//     });
-//   }
-// }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Title:', style: Theme.of(context).textTheme.titleLarge),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      currentProject.title.isEmpty
+                          ? 'No title'
+                          : currentProject.title,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: showEditTitleDialog,
+                        icon: const Icon(Icons.edit),
+                      ),
+                      IconButton(
+                        onPressed: showDeleteTitleDialog,
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      );
+    });
+  }
+}
