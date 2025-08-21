@@ -111,12 +111,17 @@ class TagsWidget extends StatelessWidget {
     }
 
     void showDeleteTagDialog(int tagIndex) {
+      final currentProject = projectC.projectData.firstWhereOrNull(
+        (p) => p.id == project.id,
+      );
+      if (currentProject == null) return;
+
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Delete Tag'),
           content: Text(
-            'Are you sure you want to delete "${project.tags[tagIndex]}"?',
+            'Are you sure you want to delete "${currentProject.tags[tagIndex]}"?',
           ),
           actions: [
             TextButton(
@@ -125,7 +130,9 @@ class TagsWidget extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                List<String> updatedTags = List<String>.from(project.tags);
+                List<String> updatedTags = List<String>.from(
+                  currentProject.tags,
+                );
                 updatedTags.removeAt(tagIndex);
 
                 await projectC.patchProject(id: project.id, tags: updatedTags);
