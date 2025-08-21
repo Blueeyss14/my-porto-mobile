@@ -6,6 +6,7 @@ import 'package:my_portfolio/src/features/project/views/widgets/contributing_wid
 import 'package:my_portfolio/src/features/project/views/widgets/images_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/resources_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/tags_widget.dart';
+import 'package:my_portfolio/src/features/project/views/widgets/thumbnail_widget.dart';
 
 class ProjectDetail extends StatelessWidget {
   const ProjectDetail({super.key});
@@ -46,6 +47,7 @@ class ProjectDetail extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 24),
+              const ThumbnailWidget(),
               const TagsWidget(),
               const ImagesWidget(),
               const ContributingWidget(),
