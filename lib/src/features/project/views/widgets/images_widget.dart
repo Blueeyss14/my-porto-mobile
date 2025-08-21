@@ -37,21 +37,10 @@ class ImagesWidget extends StatelessWidget {
                   type: FileType.media,
                 );
                 if (result != null && result.files.single.path != null) {
-                  List<PlatformFile> updatedImages = [];
-
-                  for (int i = 0; i < currentProject.imageUrl.length; i++) {
-                    if (i == imgIndex) {
-                      updatedImages.add(result.files.single);
-                    } else {
-                      updatedImages.add(
-                        PlatformFile(name: currentProject.imageUrl[i], size: 0),
-                      );
-                    }
-                  }
-
                   await projectC.patchProject(
                     id: project.id,
-                    imageFiles: updatedImages,
+                    imageFiles: [result.files.single],
+                    imageIndex: imgIndex,
                   );
                   if (!context.mounted) return;
                   Navigator.pop(context);
@@ -64,9 +53,56 @@ class ImagesWidget extends StatelessWidget {
       );
     }
 
-    void showAddTagDialog() {}
+    void showAddImageDialog() async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.media,
+        allowMultiple: true,
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final currentProject = projectC.projectData.firstWhereOrNull(
+          (p) => p.id == project.id,
+        );
+        if (currentProject == null) return;
 
-    void showDeleteTagDialog(int tagIndex) {}
+        await projectC.patchProject(
+          id: project.id,
+          imageFiles: result.files,
+          addImages: true,
+        );
+      }
+    }
+
+    void showDeleteImageDialog(int imgIndex) {
+      final currentProject = projectC.projectData.firstWhereOrNull(
+        (p) => p.id == project.id,
+      );
+      if (currentProject == null) return;
+
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Delete Image'),
+          content: const Text('Are you sure you want to delete this image?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await projectC.patchProject(
+                  id: project.id,
+                  deleteIndex: imgIndex,
+                );
+                if (!context.mounted) return;
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Obx(() {
       final currentProject = projectC.projectData.firstWhereOrNull(
@@ -84,7 +120,7 @@ class ImagesWidget extends StatelessWidget {
             children: [
               Text('Images:', style: Theme.of(context).textTheme.titleLarge),
               IconButton(
-                onPressed: () => showAddTagDialog(),
+                onPressed: () => showAddImageDialog(),
                 icon: const Icon(Icons.add),
               ),
             ],
@@ -113,7 +149,7 @@ class ImagesWidget extends StatelessWidget {
                         tooltip: 'Edit Tag',
                       ),
                       IconButton(
-                        onPressed: () => showDeleteTagDialog(index),
+                        onPressed: () => showDeleteImageDialog(index),
                         icon: const Icon(Icons.delete),
                         tooltip: 'Delete Tag',
                       ),

@@ -173,6 +173,9 @@ class ProjectViewmodel extends GetxController {
     bool? isPinned,
     PlatformFile? thumbnail,
     List<PlatformFile>? imageFiles,
+    int? imageIndex,
+    int? deleteIndex,
+    bool addImages = false,
     List<String>? tags,
     List<Map<String, String>>? contributing,
     List<Map<String, String>>? resources,
@@ -192,30 +195,27 @@ class ProjectViewmodel extends GetxController {
       if (description != null) request.fields['description'] = description;
       if (category != null) request.fields['category'] = category;
       if (isPinned != null) request.fields['is_pinned'] = isPinned.toString();
+      if (imageIndex != null) {
+        request.fields['image_index'] = imageIndex.toString();
+      }
+      if (deleteIndex != null) {
+        request.fields['delete_index'] = deleteIndex.toString();
+      }
+      if (addImages) request.fields['add_images'] = 'true';
 
-      if (thumbnail != null) {
-        if ((thumbnail.path ?? '').isNotEmpty) {
-          request.files.add(
-            await http.MultipartFile.fromPath(
-              'thumbnail',
-              thumbnail.path!,
-              filename: thumbnail.name,
-            ),
-          );
-        } else if (thumbnail.bytes != null) {
-          request.files.add(
-            http.MultipartFile.fromBytes(
-              'thumbnail',
-              thumbnail.bytes!,
-              filename: thumbnail.name,
-            ),
-          );
-        }
+      if (thumbnail != null && thumbnail.path != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'thumbnail',
+            thumbnail.path!,
+            filename: thumbnail.name,
+          ),
+        );
       }
 
       if (imageFiles != null && imageFiles.isNotEmpty) {
         for (final file in imageFiles) {
-          if ((file.path ?? '').isNotEmpty) {
+          if (file.path != null) {
             request.files.add(
               await http.MultipartFile.fromPath(
                 'image_url',
@@ -223,21 +223,11 @@ class ProjectViewmodel extends GetxController {
                 filename: file.name,
               ),
             );
-          } else if (file.bytes != null) {
-            request.files.add(
-              http.MultipartFile.fromBytes(
-                'image_url',
-                file.bytes!,
-                filename: file.name,
-              ),
-            );
           }
         }
       }
 
-      if (tags != null) {
-        request.fields['tags'] = jsonEncode(tags);
-      }
+      if (tags != null) request.fields['tags'] = jsonEncode(tags);
       if (contributing != null) {
         request.fields['contributing'] = jsonEncode(contributing);
       }
@@ -249,23 +239,21 @@ class ProjectViewmodel extends GetxController {
       final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
+        final result = jsonDecode(responseBody);
+        final index = projectData.indexWhere((p) => p.id == id);
+        if (index != -1) {
+          projectData[index] = ProjectModel.fromJson(result);
+        }
         Get.snackbar(
           'Success',
           'Project updated successfully',
           snackPosition: SnackPosition.BOTTOM,
         );
-        await fetchProjects();
       } else {
-        final errorData = () {
-          try {
-            return jsonDecode(responseBody);
-          } catch (_) {
-            return {'message': responseBody};
-          }
-        }();
+        final errorData = jsonDecode(responseBody);
         Get.snackbar(
           'Error',
-          'Failed to update project: ${errorData['error'] ?? errorData['message'] ?? response.statusCode}',
+          'Failed to update project: ${errorData['error'] ?? 'Unknown error'}',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
