@@ -60,7 +60,7 @@ class ProjectDetail extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              currentProject.imageUrl[index].url,
+                              currentProject.imageUrl[index],
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ),

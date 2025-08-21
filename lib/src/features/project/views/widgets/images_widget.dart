@@ -24,9 +24,7 @@ class ImagesWidget extends StatelessWidget {
           title: const Text('Edit Image'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Current: ${currentProject.imageUrl[imgIndex].url}'),
-            ],
+            children: [Text('Current: ${currentProject.imageUrl[imgIndex]}')],
           ),
           actions: [
             TextButton(
@@ -46,10 +44,7 @@ class ImagesWidget extends StatelessWidget {
                       updatedImages.add(result.files.single);
                     } else {
                       updatedImages.add(
-                        PlatformFile(
-                          name: currentProject.imageUrl[i].url,
-                          size: 0,
-                        ),
+                        PlatformFile(name: currentProject.imageUrl[i], size: 0),
                       );
                     }
                   }
@@ -69,9 +64,7 @@ class ImagesWidget extends StatelessWidget {
       );
     }
 
-    void showAddTagDialog() {
-      final tagController = TextEditingController();
-    }
+    void showAddTagDialog() {}
 
     void showDeleteTagDialog(int tagIndex) {}
 
@@ -97,7 +90,7 @@ class ImagesWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          if (currentProject.tags.isEmpty)
+          if (currentProject.imageUrl.isEmpty)
             const Text('No Image')
           else
             ...List.generate(
@@ -110,7 +103,7 @@ class ImagesWidget extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          currentProject.imageUrl[index].url,
+                          currentProject.imageUrl[index],
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),

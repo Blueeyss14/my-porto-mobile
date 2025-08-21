@@ -5,7 +5,7 @@ class ProjectModel {
   final String description;
   final String category;
   final bool isPinned;
-  final List<ImageItem> imageUrl;
+  final List<String> imageUrl;
   final List<String> tags;
   final String thumbnail;
   final List<Contributor> contributing;
@@ -33,11 +33,7 @@ class ProjectModel {
       description: json['description'] ?? '',
       category: json['category'] ?? '',
       isPinned: json['is_pinned'] ?? false,
-      imageUrl:
-          (json['image_url'] as List<dynamic>?)
-              ?.map((e) => ImageItem.fromJson(e))
-              .toList() ??
-          [],
+      imageUrl: List<String>.from(json['image_url'] ?? []),
       tags: List<String>.from(json['tags'] ?? []),
       thumbnail: json['thumbnail'] ?? '',
       contributing:
