@@ -10,6 +10,16 @@ class CategoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryC = Get.find<CategoryViewmodel>();
 
+    String capitalizeEachWord(String text) {
+      return text
+          .split(' ')
+          .map((word) {
+            if (word.isEmpty) return word;
+            return word[0].toUpperCase() + word.substring(1);
+          })
+          .join(' ');
+    }
+
     void showAddDialog() {
       final TextEditingController nameController = TextEditingController();
 
@@ -31,7 +41,7 @@ class CategoryPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final name = nameController.text.trim();
+                String name = capitalizeEachWord(nameController.text.trim());
                 if (name.isNotEmpty) {
                   await categoryC.createCategory(name);
                   Get.back();

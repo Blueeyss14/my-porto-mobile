@@ -56,7 +56,7 @@ class MessageViemodel extends GetxController {
   Future<void> putMessage(int id, String userName, String message) async {
     try {
       final response = await http.put(
-        Uri.parse('${dotenv.env['BASE_URL']}/messages/$id/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/messages/$id'),
         headers: headers,
         body: jsonEncode({'user_name': userName, 'message': message}),
       );
@@ -95,7 +95,7 @@ class MessageViemodel extends GetxController {
   Future<void> deleteData(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('${dotenv.env['BASE_URL']}/messages/$id/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/messages/$id'),
         headers: headers,
       );
 
