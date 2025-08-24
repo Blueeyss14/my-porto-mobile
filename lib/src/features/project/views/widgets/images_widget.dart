@@ -1,3 +1,5 @@
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +8,98 @@ import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.d
 
 class ImagesWidget extends StatelessWidget {
   const ImagesWidget({super.key});
+
+  Future<PlatformFile?> _pickSingleImageWithBytes() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+
+        if (file.bytes == null && file.path != null && !kIsWeb) {
+          try {
+            final fileBytes = await File(file.path!).readAsBytes();
+            return PlatformFile(
+              name: file.name,
+              size: file.size,
+              bytes: fileBytes,
+              path: file.path,
+            );
+          } catch (e) {
+            Get.snackbar('Error', 'Could not read file: $e');
+            return null;
+          }
+        }
+
+        if (file.bytes == null || file.bytes!.isEmpty) {
+          Get.snackbar('Error', 'Could not read file data');
+          return null;
+        }
+
+        return file;
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar('Error', 'Error picking image: $e');
+      return null;
+    }
+  }
+
+  Future<List<PlatformFile>?> _pickMultipleImagesWithBytes() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        allowMultiple: true,
+        withData: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        List<PlatformFile> validFiles = [];
+
+        for (final file in result.files) {
+          PlatformFile? processedFile;
+
+          if (file.bytes == null && file.path != null && !kIsWeb) {
+            try {
+              final fileBytes = await File(file.path!).readAsBytes();
+              processedFile = PlatformFile(
+                name: file.name,
+                size: file.size,
+                bytes: fileBytes,
+                path: file.path,
+              );
+            } catch (e) {
+              print('Could not read file ${file.name}: $e');
+              continue;
+            }
+          } else {
+            processedFile = file;
+          }
+
+          if (processedFile.bytes != null && processedFile.bytes!.isNotEmpty) {
+            validFiles.add(processedFile);
+          }
+        }
+
+        if (validFiles.isEmpty) {
+          Get.snackbar('Error', 'Could not read any file data');
+          return null;
+        }
+
+        return validFiles;
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar('Error', 'Error picking images: $e');
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +127,11 @@ class ImagesWidget extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                FilePickerResult? result = await FilePicker.platform.pickFiles(
-                  type: FileType.media,
-                );
-                if (result != null && result.files.single.path != null) {
+                final pickedFile = await _pickSingleImageWithBytes();
+                if (pickedFile != null) {
                   await projectC.patchProject(
                     id: project.id,
-                    imageFiles: [result.files.single],
+                    imageFiles: [pickedFile],
                     imageIndex: imgIndex,
                   );
                   if (!context.mounted) return;
@@ -54,11 +146,8 @@ class ImagesWidget extends StatelessWidget {
     }
 
     void showAddImageDialog() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.media,
-        allowMultiple: true,
-      );
-      if (result != null && result.files.isNotEmpty) {
+      final pickedFiles = await _pickMultipleImagesWithBytes();
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
         final currentProject = projectC.projectData.firstWhereOrNull(
           (p) => p.id == project.id,
         );
@@ -66,7 +155,7 @@ class ImagesWidget extends StatelessWidget {
 
         await projectC.patchProject(
           id: project.id,
-          imageFiles: result.files,
+          imageFiles: pickedFiles,
           addImages: true,
         );
       }
@@ -146,12 +235,12 @@ class ImagesWidget extends StatelessWidget {
                       IconButton(
                         onPressed: () => showEditImageDialog(index),
                         icon: const Icon(Icons.edit),
-                        tooltip: 'Edit Tag',
+                        tooltip: 'Edit Image',
                       ),
                       IconButton(
                         onPressed: () => showDeleteImageDialog(index),
                         icon: const Icon(Icons.delete),
-                        tooltip: 'Delete Tag',
+                        tooltip: 'Delete Image',
                       ),
                     ],
                   ),
