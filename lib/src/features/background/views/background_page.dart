@@ -13,48 +13,53 @@ class BackgroundPage extends StatelessWidget {
     final backgroundC = Get.find<BackgroundViewmodels>();
     return Scaffold(
       appBar: const AppbarCustom(title: 'Background Page'),
-      body: Obx(() {
-        return ListView.builder(
-          itemCount: backgroundC.backgorundData.length,
-          itemBuilder: (context, index) => Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(backgroundC.backgorundData[index].filename),
-                      Text(backgroundC.backgorundData[index].mimetype),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => _showEditDialog(
-                          context,
-                          backgroundC.backgorundData[index],
-                          backgroundC,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          backgroundC.fetchBackground();
+        },
+        child: Obx(() {
+          return ListView.builder(
+            itemCount: backgroundC.backgorundData.length,
+            itemBuilder: (context, index) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(backgroundC.backgorundData[index].filename),
+                        Text(backgroundC.backgorundData[index].mimetype),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => _showEditDialog(
+                            context,
+                            backgroundC.backgorundData[index],
+                            backgroundC,
+                          ),
+                          icon: const Icon(Icons.edit),
                         ),
-                        icon: const Icon(Icons.edit),
-                      ),
-                      IconButton(
-                        onPressed: () => _showDeleteDialog(
-                          context,
-                          backgroundC.backgorundData[index].id,
-                          backgroundC,
+                        IconButton(
+                          onPressed: () => _showDeleteDialog(
+                            context,
+                            backgroundC.backgorundData[index].id,
+                            backgroundC,
+                          ),
+                          icon: const Icon(Icons.delete),
                         ),
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddDialog(context, backgroundC),
         child: const Icon(Icons.add),

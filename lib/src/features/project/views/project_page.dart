@@ -36,62 +36,69 @@ class ProjectPage extends StatelessWidget {
 
     return Scaffold(
       appBar: const AppbarCustom(title: 'Projects'),
-      body: Obx(
-        () => projectC.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: projectC.projectData.length,
-                itemBuilder: (context, index) => GestureDetector(
-                  onTap: () => Get.toNamed(
-                    RoutesName.projectDetail,
-                    arguments: projectC.projectData[index],
-                  ),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  projectC.projectData[index].title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                if (projectC
-                                    .projectData[index]
-                                    .subtitle
-                                    .isNotEmpty)
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await projectC.fetchProjects();
+        },
+        child: Obx(
+          () => projectC.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  itemCount: projectC.projectData.length,
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () => Get.toNamed(
+                      RoutesName.projectDetail,
+                      arguments: projectC.projectData[index],
+                    ),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    projectC.projectData[index].subtitle,
-                                    style: const TextStyle(color: Colors.grey),
+                                    projectC.projectData[index].title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                Text(
-                                  'Category: ${projectC.projectData[index].category}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                  if (projectC
+                                      .projectData[index]
+                                      .subtitle
+                                      .isNotEmpty)
+                                    Text(
+                                      projectC.projectData[index].subtitle,
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  Text(
+                                    'Category: ${projectC.projectData[index].category}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          if (projectC.projectData[index].isPinned)
-                            const Icon(Icons.push_pin, size: 16),
-                          IconButton(
-                            onPressed: () => showDeleteDialog(index),
-                            icon: const Icon(Icons.delete),
-                          ),
-                        ],
+                            if (projectC.projectData[index].isPinned)
+                              const Icon(Icons.push_pin, size: 16),
+                            IconButton(
+                              onPressed: () => showDeleteDialog(index),
+                              icon: const Icon(Icons.delete),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.toNamed(RoutesName.projectInputPage),

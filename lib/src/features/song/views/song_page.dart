@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:my_portfolio/src/core/refresh_data.dart';
 import 'package:my_portfolio/src/features/song/viewmodels/song_viewmodel.dart';
 import 'package:my_portfolio/src/features/song/models/song_model.dart';
 import 'package:my_portfolio/src/shared/components/appbar_custom.dart';
@@ -17,7 +16,9 @@ class SongPage extends StatelessWidget {
     return Scaffold(
       appBar: const AppbarCustom(title: 'Song Page'),
       body: RefreshIndicator(
-        onRefresh: refreshData,
+        onRefresh: () async {
+          songC.fetchMusic();
+        },
         child: Obx(() {
           return ListView.builder(
             itemCount: songC.songData.length,

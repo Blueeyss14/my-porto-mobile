@@ -82,40 +82,45 @@ class MessagePage extends StatelessWidget {
 
     return Scaffold(
       appBar: const AppbarCustom(title: 'Message Page'),
-      body: Obx(
-        () => ListView.builder(
-          itemCount: messageC.messageData.length,
-          itemBuilder: (context, index) => Card(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          messageC.fetchMessage();
+        },
+        child: Obx(
+          () => ListView.builder(
+            itemCount: messageC.messageData.length,
+            itemBuilder: (context, index) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            messageC.messageData[index].userName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(messageC.messageData[index].message),
+                        ],
+                      ),
+                    ),
+                    Row(
                       children: [
-                        Text(
-                          messageC.messageData[index].userName,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        IconButton(
+                          onPressed: () => showEditDialog(index),
+                          icon: const Icon(Icons.edit),
                         ),
-                        Text(messageC.messageData[index].message),
+                        IconButton(
+                          onPressed: () => showDeleteDialog(index),
+                          icon: const Icon(Icons.delete),
+                        ),
                       ],
                     ),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => showEditDialog(index),
-                        icon: const Icon(Icons.edit),
-                      ),
-                      IconButton(
-                        onPressed: () => showDeleteDialog(index),
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

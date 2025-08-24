@@ -88,7 +88,7 @@ class CategoryPage extends StatelessWidget {
 
       body: RefreshIndicator(
         onRefresh: () async {
-          await Get.find<CategoryViewmodel>().fetchCategories();
+          await categoryC.fetchCategories();
         },
         child: Obx(
           () => ListView.builder(
