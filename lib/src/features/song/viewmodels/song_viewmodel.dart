@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:my_portfolio/src/features/song/models/song_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class SongViewmodel extends GetxController {
   var songData = <SongModel>[].obs;
@@ -35,16 +36,35 @@ class SongViewmodel extends GetxController {
   Future<void> uploadSongFile(File file, String songName) async {
     var tempId = DateTime.now().millisecondsSinceEpoch;
     songData.add(
-      SongModel(id: tempId, songName: songName, songFile: file.path),
+      SongModel(
+        id: tempId,
+        songName: songName,
+        songFile: file.path,
+        mimetype: '',
+      ),
     );
 
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('${dotenv.env['BASE_URL']}/music/'),
+      Uri.parse('${dotenv.env['BASE_URL']}/music'),
     );
     request.headers.addAll(headers);
+
+    ///mimetype
+    String mimetype = 'audio/mpeg'; //default mp3
+    String fileName = file.path.split('/').last.toLowerCase();
+    if (fileName.endsWith('.mp3')) mimetype = 'audio/mpeg';
+    if (fileName.endsWith('.wav')) mimetype = 'audio/wav';
+    if (fileName.endsWith('.m4a')) mimetype = 'audio/mp4';
+    if (fileName.endsWith('.flac')) mimetype = 'audio/flac';
+
     request.files.add(
-      await http.MultipartFile.fromPath('song_file', file.path),
+      http.MultipartFile.fromBytes(
+        'song_file',
+        await file.readAsBytes(),
+        filename: fileName,
+        contentType: MediaType.parse(mimetype),
+      ),
     );
     request.fields['song_name'] = songName;
 
@@ -52,7 +72,13 @@ class SongViewmodel extends GetxController {
       var response = await request.send();
       if (response.statusCode >= 200 && response.statusCode < 300) {
         var respStr = await http.Response.fromStream(response);
-        var newSong = SongModel.fromJson(jsonDecode(respStr.body)['data']);
+        var responseData = jsonDecode(respStr.body);
+        var newSong = SongModel(
+          id: responseData['id'],
+          songName: songName,
+          songFile: '${dotenv.env['BASE_URL']}/music/${responseData['id']}',
+          mimetype: '',
+        );
         final index = songData.indexWhere((s) => s.id == tempId);
         if (index != -1) songData[index] = newSong;
       } else {
@@ -70,7 +96,10 @@ class SongViewmodel extends GetxController {
     songData[index] = SongModel(
       id: id,
       songName: songName,
-      songFile: filePath ?? oldSong.songFile,
+      songFile: filePath != null
+          ? '${dotenv.env['BASE_URL']}/music/$id'
+          : oldSong.songFile,
+      mimetype: '',
     );
 
     try {
@@ -78,18 +107,32 @@ class SongViewmodel extends GetxController {
       if (filePath != null) {
         var request = http.MultipartRequest(
           'PUT',
-          Uri.parse('${dotenv.env['BASE_URL']}/music/$id/'),
+          Uri.parse('${dotenv.env['BASE_URL']}/music/$id'),
         );
         request.headers.addAll(headers);
         request.fields['song_name'] = songName;
+
+        ///mimetype
+        String mimetype = 'audio/mpeg'; //default mp3
+        String fileName = filePath.split('/').last.toLowerCase();
+        if (fileName.endsWith('.mp3')) mimetype = 'audio/mpeg';
+        if (fileName.endsWith('.wav')) mimetype = 'audio/wav';
+        if (fileName.endsWith('.m4a')) mimetype = 'audio/mp4';
+        if (fileName.endsWith('.flac')) mimetype = 'audio/flac';
+
         request.files.add(
-          await http.MultipartFile.fromPath('song_file', filePath),
+          http.MultipartFile.fromBytes(
+            'song_file',
+            await File(filePath).readAsBytes(),
+            filename: fileName,
+            contentType: MediaType.parse(mimetype),
+          ),
         );
         var streamedResponse = await request.send();
         response = await http.Response.fromStream(streamedResponse);
       } else {
         response = await http.put(
-          Uri.parse('${dotenv.env['BASE_URL']}/music/$id/'),
+          Uri.parse('${dotenv.env['BASE_URL']}/music/$id'),
           headers: {...headers, 'Content-Type': 'application/json'},
           body: jsonEncode({'song_name': songName}),
         );
@@ -109,7 +152,7 @@ class SongViewmodel extends GetxController {
 
     try {
       final response = await http.delete(
-        Uri.parse('${dotenv.env['BASE_URL']}/music/$id/'),
+        Uri.parse('${dotenv.env['BASE_URL']}/music/$id'),
         headers: headers,
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
