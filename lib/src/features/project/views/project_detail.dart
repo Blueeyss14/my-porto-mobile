@@ -10,6 +10,7 @@ import 'package:my_portfolio/src/features/project/views/widgets/subtitle_widget.
 import 'package:my_portfolio/src/features/project/views/widgets/tags_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/thumbnail_widget.dart';
 import 'package:my_portfolio/src/features/project/views/widgets/title_widget.dart';
+import 'package:my_portfolio/src/shared/components/appbar_custom.dart';
 
 class ProjectDetail extends StatelessWidget {
   const ProjectDetail({super.key});
@@ -20,10 +21,32 @@ class ProjectDetail extends StatelessWidget {
     final projectC = Get.find<ProjectViewmodel>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(project.title)),
+      appBar: AppbarCustom(
+        title: 'Project Detail',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Obx(() {
+              final currentProject = projectC.projectData.firstWhereOrNull(
+                (p) => p.id == project.id,
+              );
+
+              return Checkbox(
+                value: currentProject?.isPinned ?? project.isPinned,
+                onChanged: (val) async {
+                  await projectC.patchProject(
+                    id: project.id,
+                    isPinned: val ?? false,
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
-          Get.find<ProjectViewmodel>();
+          await projectC.fetchProjects();
         },
         child: Obx(() {
           final currentProject = projectC.projectData.firstWhereOrNull(
