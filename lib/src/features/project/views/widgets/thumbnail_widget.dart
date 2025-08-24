@@ -1,6 +1,3 @@
-import 'dart:io' show File;
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_portfolio/src/features/project/models/project_model.dart';
@@ -8,47 +5,6 @@ import 'package:my_portfolio/src/features/project/viewmodels/project_viewmodel.d
 
 class ThumbnailWidget extends StatelessWidget {
   const ThumbnailWidget({super.key});
-
-  Future<PlatformFile?> _pickThumbnailWithBytes() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-        allowMultiple: false,
-        withData: true,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-
-        if (file.bytes == null && file.path != null && !kIsWeb) {
-          try {
-            final fileBytes = await File(file.path!).readAsBytes();
-            return PlatformFile(
-              name: file.name,
-              size: file.size,
-              bytes: fileBytes,
-              path: file.path,
-            );
-          } catch (e) {
-            Get.snackbar('Error', 'Could not read file: $e');
-            return null;
-          }
-        }
-
-        if (file.bytes == null || file.bytes!.isEmpty) {
-          Get.snackbar('Error', 'Could not read file data');
-          return null;
-        }
-
-        return file;
-      }
-      return null;
-    } catch (e) {
-      Get.snackbar('Error', 'Error picking thumbnail: $e');
-      return null;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +32,7 @@ class ThumbnailWidget extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final pickedFile = await _pickThumbnailWithBytes();
+                final pickedFile = await projectC.pickSingleImage();
                 if (pickedFile != null) {
                   await projectC.patchProject(
                     id: project.id,
@@ -94,7 +50,7 @@ class ThumbnailWidget extends StatelessWidget {
     }
 
     void showAddThumbnailDialog() async {
-      final pickedFile = await _pickThumbnailWithBytes();
+      final pickedFile = await projectC.pickSingleImage();
       if (pickedFile != null) {
         await projectC.patchProject(id: project.id, thumbnail: pickedFile);
       }
